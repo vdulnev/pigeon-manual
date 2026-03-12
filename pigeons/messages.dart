@@ -1,3 +1,6 @@
+// After regenerating, copy ios/Runner/messages.g.swift → macos/Runner/messages.g.swift.
+// Pigeon has no separate macOS Swift output (confirmed through v26); swiftOut targets
+// iOS but the generated file supports both platforms via #if os(iOS)/#elseif os(macOS).
 import 'package:pigeon/pigeon.dart';
 
 @ConfigurePigeon(
