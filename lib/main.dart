@@ -91,12 +91,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _onButtonPressed(String label) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$label pressed')),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final listening = _counterSubscription != null;
@@ -126,11 +120,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ElevatedButton(
               onPressed: _onButton3Pressed,
               child: const Text('Button 3 – Ping Native'),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => _onButtonPressed('Button 4'),
-              child: const Text('Button 4'),
             ),
           ],
         ),
