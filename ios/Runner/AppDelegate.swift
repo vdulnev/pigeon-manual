@@ -12,5 +12,15 @@ import UIKit
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+    ExampleHostApiSetup.setUp(
+      binaryMessenger: engineBridge.applicationRegistrar.messenger(),
+      api: PlatformNameHandler()
+    )
+  }
+}
+
+private class PlatformNameHandler: ExampleHostApi {
+  func getPlatformName() throws -> String {
+    return "iOS"
   }
 }

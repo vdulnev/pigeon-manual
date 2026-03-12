@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'src/messages.g.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -23,6 +25,17 @@ class MyApp extends StatelessWidget {
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
+  Future<void> _onButton1Pressed(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final api = ExampleHostApi();
+    try {
+      final name = await api.getPlatformName();
+      messenger.showSnackBar(SnackBar(content: Text('Platform: $name')));
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
+  }
+
   void _onButtonPressed(BuildContext context, String label) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('$label pressed')),
@@ -41,8 +54,8 @@ class HomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: () => _onButtonPressed(context, 'Button 1'),
-              child: const Text('Button 1'),
+              onPressed: () => _onButton1Pressed(context),
+              child: const Text('Button 1 – Get Platform Name'),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
