@@ -4,6 +4,7 @@ import android.os.Handler
 import android.os.Looper
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.BinaryMessenger
 
 class MainActivity : FlutterActivity() {
   override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -11,11 +12,18 @@ class MainActivity : FlutterActivity() {
     val messenger = flutterEngine.dartExecutor.binaryMessenger
     ExampleHostApi.setUp(messenger, PlatformNameHandler())
     OnCountStreamHandler.register(messenger, CounterStreamHandler())
+    PingHostApi.setUp(messenger, PingHostHandler(messenger))
   }
 }
 
 private class PlatformNameHandler : ExampleHostApi {
   override fun getPlatformName(): String = "Android"
+}
+
+private class PingHostHandler(private val messenger: BinaryMessenger) : PingHostApi {
+  override fun requestPing() {
+    PingFlutterApi(messenger).onPong("Pong from Android!") {}
+  }
 }
 
 private class CounterStreamHandler : OnCountStreamHandler() {

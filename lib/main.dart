@@ -35,6 +35,25 @@ class _HomeScreenState extends State<HomeScreen> {
   StreamSubscription<int>? _counterSubscription;
   int? _count;
 
+  @override
+  void initState() {
+    super.initState();
+    PingFlutterApi.setUp(_PingFlutterApiHandler((message) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message)),
+        );
+      }
+    }));
+  }
+
+  @override
+  void dispose() {
+    PingFlutterApi.setUp(null);
+    _counterSubscription?.cancel();
+    super.dispose();
+  }
+
   Future<void> _onButton1Pressed() async {
     final messenger = ScaffoldMessenger.of(context);
     final api = ExampleHostApi();
@@ -63,10 +82,13 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  @override
-  void dispose() {
-    _counterSubscription?.cancel();
-    super.dispose();
+  Future<void> _onButton3Pressed() async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await PingHostApi().requestPing();
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
   }
 
   void _onButtonPressed(String label) {
@@ -102,8 +124,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => _onButtonPressed('Button 3'),
-              child: const Text('Button 3'),
+              onPressed: _onButton3Pressed,
+              child: const Text('Button 3 – Ping Native'),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
@@ -115,4 +137,13 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+}
+
+class _PingFlutterApiHandler implements PingFlutterApi {
+  final void Function(String) _callback;
+
+  _PingFlutterApiHandler(this._callback);
+
+  @override
+  void onPong(String message) => _callback(message);
 }

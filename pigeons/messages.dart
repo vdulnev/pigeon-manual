@@ -21,3 +21,14 @@ abstract class ExampleHostApi {
 abstract class CounterEventApi {
   int onCount();
 }
+
+// Flutter calls requestPing(); native calls back via PingFlutterApi.onPong().
+@HostApi()
+abstract class PingHostApi {
+  void requestPing();
+}
+
+@FlutterApi()
+abstract class PingFlutterApi {
+  void onPong(String message);
+}

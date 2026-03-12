@@ -15,12 +15,25 @@ import UIKit
     let messenger = engineBridge.applicationRegistrar.messenger()
     ExampleHostApiSetup.setUp(binaryMessenger: messenger, api: PlatformNameHandler())
     OnCountStreamHandler.register(with: messenger, streamHandler: CounterStreamHandler())
+    PingHostApiSetup.setUp(binaryMessenger: messenger, api: PingHostHandler(messenger: messenger))
   }
 }
 
 private class PlatformNameHandler: ExampleHostApi {
   func getPlatformName() throws -> String {
     return "iOS"
+  }
+}
+
+private class PingHostHandler: PingHostApi {
+  private let messenger: FlutterBinaryMessenger
+
+  init(messenger: FlutterBinaryMessenger) {
+    self.messenger = messenger
+  }
+
+  func requestPing() throws {
+    PingFlutterApi(binaryMessenger: messenger).onPong(message: "Pong from iOS!") { _ in }
   }
 }
 

@@ -13,6 +13,7 @@ class MainFlutterWindow: NSWindow {
     let messenger = flutterViewController.engine.binaryMessenger
     ExampleHostApiSetup.setUp(binaryMessenger: messenger, api: PlatformNameHandler())
     OnCountStreamHandler.register(with: messenger, streamHandler: CounterStreamHandler())
+    PingHostApiSetup.setUp(binaryMessenger: messenger, api: PingHostHandler(messenger: messenger))
 
     super.awakeFromNib()
   }
@@ -21,6 +22,18 @@ class MainFlutterWindow: NSWindow {
 private class PlatformNameHandler: ExampleHostApi {
   func getPlatformName() throws -> String {
     return "macOS"
+  }
+}
+
+private class PingHostHandler: PingHostApi {
+  private let messenger: FlutterBinaryMessenger
+
+  init(messenger: FlutterBinaryMessenger) {
+    self.messenger = messenger
+  }
+
+  func requestPing() throws {
+    PingFlutterApi(binaryMessenger: messenger).onPong(message: "Pong from macOS!") { _ in }
   }
 }
 
