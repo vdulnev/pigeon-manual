@@ -37,6 +37,8 @@ class _PigeonCodec extends StandardMessageCodec {
   }
 }
 
+const StandardMethodCodec pigeonMethodCodec = StandardMethodCodec(_PigeonCodec());
+
 class ExampleHostApi {
   /// Constructor for [ExampleHostApi].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
@@ -77,3 +79,15 @@ class ExampleHostApi {
     }
   }
 }
+
+Stream<int> onCount( {String instanceName = ''}) {
+  if (instanceName.isNotEmpty) {
+    instanceName = '.$instanceName';
+  }
+  final EventChannel onCountChannel =
+      EventChannel('dev.flutter.pigeon.pigeon_manual.CounterEventApi.onCount$instanceName', pigeonMethodCodec);
+  return onCountChannel.receiveBroadcastStream().map((dynamic event) {
+    return event as int;
+  });
+}
+    

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'src/messages.g.dart';
@@ -22,10 +24,18 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
-  Future<void> _onButton1Pressed(BuildContext context) async {
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  StreamSubscription<int>? _counterSubscription;
+  int? _count;
+
+  Future<void> _onButton1Pressed() async {
     final messenger = ScaffoldMessenger.of(context);
     final api = ExampleHostApi();
     try {
@@ -36,7 +46,30 @@ class HomeScreen extends StatelessWidget {
     }
   }
 
-  void _onButtonPressed(BuildContext context, String label) {
+  void _onButton2Pressed() {
+    if (_counterSubscription != null) {
+      _counterSubscription!.cancel();
+      setState(() {
+        _counterSubscription = null;
+        _count = null;
+      });
+    } else {
+      final subscription = onCount().listen(
+        (count) => setState(() => _count = count),
+        onError: (Object e) => setState(() => _counterSubscription = null),
+        onDone: () => setState(() => _counterSubscription = null),
+      );
+      setState(() => _counterSubscription = subscription);
+    }
+  }
+
+  @override
+  void dispose() {
+    _counterSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _onButtonPressed(String label) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('$label pressed')),
     );
@@ -44,6 +77,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final listening = _counterSubscription != null;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
@@ -54,22 +88,26 @@ class HomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: () => _onButton1Pressed(context),
+              onPressed: _onButton1Pressed,
               child: const Text('Button 1 – Get Platform Name'),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => _onButtonPressed(context, 'Button 2'),
-              child: const Text('Button 2'),
+              onPressed: _onButton2Pressed,
+              child: Text(
+                listening
+                    ? 'Button 2 – Stop Counter (${_count ?? 0})'
+                    : 'Button 2 – Start Counter',
+              ),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => _onButtonPressed(context, 'Button 3'),
+              onPressed: () => _onButtonPressed('Button 3'),
               child: const Text('Button 3'),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => _onButtonPressed(context, 'Button 4'),
+              onPressed: () => _onButtonPressed('Button 4'),
               child: const Text('Button 4'),
             ),
           ],

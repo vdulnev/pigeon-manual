@@ -13,3 +13,8 @@ import 'package:pigeon/pigeon.dart';
 abstract class ExampleHostApi {
   String getPlatformName();
 }
+
+@EventChannelApi()
+abstract class CounterEventApi {
+  int onCount();
+}

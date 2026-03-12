@@ -54,6 +54,8 @@ private open class messagesPigeonCodec : StandardMessageCodec() {
   }
 }
 
+val messagesPigeonMethodCodec = StandardMethodCodec(messagesPigeonCodec());
+
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface ExampleHostApi {
   fun getPlatformName(): String
@@ -85,3 +87,53 @@ interface ExampleHostApi {
     }
   }
 }
+
+private class PigeonStreamHandler<T>(
+    val wrapper: PigeonEventChannelWrapper<T>
+) : EventChannel.StreamHandler {
+  var pigeonSink: PigeonEventSink<T>? = null
+
+  override fun onListen(p0: Any?, sink: EventChannel.EventSink) {
+    pigeonSink = PigeonEventSink<T>(sink)
+    wrapper.onListen(p0, pigeonSink!!)
+  }
+
+  override fun onCancel(p0: Any?) {
+    pigeonSink = null
+    wrapper.onCancel(p0)
+  }
+}
+
+interface PigeonEventChannelWrapper<T> {
+  open fun onListen(p0: Any?, sink: PigeonEventSink<T>) {}
+
+  open fun onCancel(p0: Any?) {}
+}
+
+class PigeonEventSink<T>(private val sink: EventChannel.EventSink) {
+  fun success(value: T) {
+    sink.success(value)
+  }
+
+  fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
+    sink.error(errorCode, errorMessage, errorDetails)
+  }
+  
+  fun endOfStream() { 
+    sink.endOfStream()
+  }
+}
+      
+abstract class OnCountStreamHandler : PigeonEventChannelWrapper<Long> {
+  companion object {
+    fun register(messenger: BinaryMessenger, streamHandler: OnCountStreamHandler, instanceName: String = "") {
+      var channelName: String = "dev.flutter.pigeon.pigeon_manual.CounterEventApi.onCount"
+      if (instanceName.isNotEmpty()) {
+        channelName += ".$instanceName"
+      }
+      val internalStreamHandler = PigeonStreamHandler<Long>(streamHandler)
+      EventChannel(messenger, channelName, messagesPigeonMethodCodec).setStreamHandler(internalStreamHandler)
+    }
+  }
+}
+      
